@@ -1,0 +1,3175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Honduras: El Costo de la Vida</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Trebuchet MS', sans-serif;
+            background: linear-gradient(135deg, #0073cf 0%, #00539c 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Start Screen */
+        .start-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 30px;
+            color: white;
+            text-align: center;
+        }
+
+        .start-screen h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+        }
+
+        .start-screen p {
+            font-size: 1.2em;
+            max-width: 600px;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .goal-selection {
+            background: rgba(255,255,255,0.95);
+            padding: 40px;
+            border-radius: 20px;
+            color: #333;
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .goal-selection h2 {
+            margin-bottom: 30px;
+            color: #0073cf;
+        }
+
+        .goal-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .goal-btn {
+            padding: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: 3px solid transparent;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .goal-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .goal-btn.selected {
+            border-color: #ffd700;
+            box-shadow: 0 0 20px rgba(255,215,0,0.5);
+        }
+
+        .start-game-btn {
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .start-game-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Main Game Container */
+        .game-container {
+            display: none;
+            max-width: 1400px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .game-header {
+            background: linear-gradient(135deg, #0073cf 0%, #00a8e8 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .game-title {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .goal-display {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-size: 0.9em;
+        }
+
+        /* Top Stats Bar */
+        .top-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 3px solid #dee2e6;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #6c757d;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #0073cf;
+        }
+
+        /* Main Game Area */
+        .game-area {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        /* Left Panel - Family */
+        .family-panel {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            max-height: calc(100vh - 300px);
+            overflow-y: auto;
+        }
+
+        .family-member {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 3px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+
+        .family-member.selected {
+            border-color: #0073cf;
+            box-shadow: 0 4px 12px rgba(0,115,207,0.3);
+        }
+
+        .member-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+        }
+
+        .member-name {
+            text-align: center;
+            font-weight: bold;
+            color: #212529;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .member-bars {
+            margin-top: 10px;
+        }
+
+        .bar-container {
+            margin-bottom: 8px;
+        }
+
+        .bar-label {
+            font-size: 0.75em;
+            color: #6c757d;
+            margin-bottom: 3px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .bar {
+            height: 15px;
+            background: #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 8px;
+        }
+
+        .health-fill { background: linear-gradient(90deg, #ff6b6b, #ee5a6f); }
+        .education-fill { background: linear-gradient(90deg, #4ecdc4, #44a8b0); }
+        .happiness-fill { background: linear-gradient(90deg, #ffd93d, #f9ca24); }
+
+        .member-status {
+            margin-top: 8px;
+            font-size: 0.8em;
+            color: #495057;
+            text-align: center;
+            font-style: italic;
+        }
+
+        /* Right Panel - Actions */
+        .actions-panel {
+            background: #fff;
+        }
+
+        .season-header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .season-title {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        .season-subtitle {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .action-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 15px;
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            background: #e9ecef;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .action-content {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            min-height: 400px;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .action-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #dee2e6;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .action-card:hover:not(.disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            border-color: #0073cf;
+        }
+
+        .action-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .action-card.selected {
+            border-color: #0073cf;
+            background: #e7f3ff;
+        }
+
+        .action-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .action-name {
+            font-weight: bold;
+            color: #212529;
+            margin-bottom: 8px;
+        }
+
+        .action-details {
+            font-size: 0.85em;
+            color: #6c757d;
+            line-height: 1.4;
+        }
+
+        .action-cost {
+            margin-top: 8px;
+            font-weight: bold;
+            color: #f5576c;
+        }
+
+        .action-benefit {
+            margin-top: 5px;
+            font-weight: bold;
+            color: #43e97b;
+        }
+
+        /* Shop Items */
+        .shop-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .shop-item {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #dee2e6;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .shop-item:hover:not(.owned):not(.too-expensive) {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            border-color: #0073cf;
+        }
+
+        .shop-item.owned {
+            background: #d4edda;
+            border-color: #28a745;
+            cursor: default;
+        }
+
+        .shop-item.too-expensive {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .item-icon {
+            font-size: 2.5em;
+            margin-bottom: 8px;
+        }
+
+        .item-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .item-price {
+            color: #0073cf;
+            font-weight: bold;
+        }
+
+        .item-benefit {
+            font-size: 0.8em;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        /* Living Conditions */
+        .living-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .living-option {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 3px solid #dee2e6;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .living-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .living-option.selected {
+            border-color: #0073cf;
+            background: #e7f3ff;
+        }
+
+        .living-option h3 {
+            margin-bottom: 10px;
+            color: #212529;
+        }
+
+        .living-cost {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #f5576c;
+            margin-bottom: 10px;
+        }
+
+        .living-effects {
+            font-size: 0.85em;
+            color: #6c757d;
+        }
+
+        /* Community Buildings */
+        .community-progress {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .building-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .building-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .building-name {
+            font-weight: bold;
+            color: #212529;
+        }
+
+        .building-status {
+            font-size: 0.85em;
+            color: #6c757d;
+        }
+
+        .progress-bar {
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+            transition: width 0.5s ease;
+        }
+
+        /* Bottom Action Bar */
+        .bottom-bar {
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 3px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .advance-btn {
+            flex: 1;
+            min-width: 200px;
+            padding: 20px 40px;
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .advance-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+
+        .advance-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #212529;
+            text-align: center;
+        }
+
+        .modal-body {
+            font-size: 1.1em;
+            color: #495057;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .modal-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .modal-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Dialogue Modal Specific Styles */
+        .dialogue-modal .modal-content {
+            max-width: 700px;
+        }
+
+        .dialogue-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .dialogue-avatar {
+            font-size: 4em;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .dialogue-info {
+            flex: 1;
+        }
+
+        .dialogue-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #212529;
+            margin-bottom: 5px;
+        }
+
+        .dialogue-emotion {
+            font-size: 1em;
+            color: #6c757d;
+        }
+
+        .speech-bubble {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #212529;
+            position: relative;
+        }
+
+        .speech-bubble::before {
+            content: '"';
+            font-size: 3em;
+            color: #667eea;
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            opacity: 0.3;
+        }
+
+        .choice-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .choice-btn {
+            width: 100%;
+            padding: 20px;
+            background: white;
+            border: 3px solid #dee2e6;
+            border-radius: 15px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            color: #212529;
+            font-weight: 500;
+        }
+
+        .choice-btn:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .choice-btn:active {
+            transform: translateX(5px) scale(0.98);
+        }
+
+        /* Achievement Notification */
+        .achievement-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+            z-index: 2000;
+            animation: slideInRight 0.5s ease, pulse 0.5s ease 0.5s;
+            min-width: 300px;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .achievement-notification h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .achievement-notification p {
+            margin: 0;
+            font-size: 1em;
+            opacity: 0.95;
+        }
+
+        /* Skills Display */
+        .skills-panel {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .skill-item {
+            margin-bottom: 8px;
+        }
+
+        .skill-name {
+            font-size: 0.8em;
+            color: #6c757d;
+            margin-bottom: 3px;
+            text-transform: capitalize;
+        }
+
+        .skill-bar {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .skill-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        /* End Screen */
+        .end-screen {
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        .end-screen h2 {
+            font-size: 2.5em;
+            color: #212529;
+            margin-bottom: 30px;
+        }
+
+        .final-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .final-stat {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .final-stat-label {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+
+        .final-stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #0073cf;
+        }
+
+        .restart-btn {
+            padding: 20px 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .game-area {
+                grid-template-columns: 1fr;
+            }
+
+            .family-panel {
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Start Screen -->
+    <div class="start-screen" id="startScreen">
+        <h1>🇭🇳 Honduras: El Costo de la Vida</h1>
+        <p>You will guide the Rodríguez family through 4 years (16 seasons) in rural Honduras. Make decisions about work, education, and survival while facing the challenges of poverty.</p>
+        
+        <div class="goal-selection">
+            <h2>Choose Your Family's Main Goal</h2>
+            <div class="goal-options">
+                <button class="goal-btn" onclick="selectGoal('education')">
+                    📚 EDUCATION<br>
+                    <small>Get diplomas for the family</small>
+                </button>
+                <button class="goal-btn" onclick="selectGoal('money')">
+                    💰 MAKE MONEY<br>
+                    <small>Build wealth and security</small>
+                </button>
+                <button class="goal-btn" onclick="selectGoal('health')">
+                    ❤️ STAY HEALTHY<br>
+                    <small>Keep everyone well</small>
+                </button>
+                <button class="goal-btn" onclick="selectGoal('happiness')">
+                    😊 HAPPINESS<br>
+                    <small>Maintain family joy</small>
+                </button>
+            </div>
+            <button class="start-game-btn" id="startGameBtn" onclick="startGame()" disabled>
+                Start Your Journey
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Game Container -->
+    <div class="game-container" id="gameContainer">
+        <!-- Header -->
+        <div class="game-header">
+            <div class="game-title">🇭🇳 Honduras: El Costo de la Vida</div>
+            <div class="goal-display" id="goalDisplay"></div>
+        </div>
+
+        <!-- Top Stats -->
+        <div class="top-stats">
+            <div class="stat-box">
+                <div class="stat-label">SEASON</div>
+                <div class="stat-value" id="seasonDisplay">1 / 16</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">MONEY</div>
+                <div class="stat-value" id="moneyDisplay">500 L</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">LIVING</div>
+                <div class="stat-value" id="livingDisplay">Poor</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">DIPLOMAS</div>
+                <div class="stat-value" id="diplomaDisplay">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">ACHIEVEMENTS</div>
+                <div class="stat-value" id="achievementDisplay">0</div>
+            </div>
+        </div>
+
+        <!-- Main Game Area -->
+        <div class="game-area">
+            <!-- Left: Family Panel -->
+            <div class="family-panel" id="familyPanel"></div>
+
+            <!-- Right: Actions Panel -->
+            <div class="actions-panel">
+                <div class="season-header">
+                    <div class="season-title" id="seasonTitle">Dry Season - Year 1</div>
+                    <div class="season-subtitle">Choose actions for each family member</div>
+                </div>
+
+                <div class="action-tabs">
+                    <button class="tab-btn active" onclick="showTab('actions')">Actions</button>
+                    <button class="tab-btn" onclick="showTab('healthcare')">Healthcare</button>
+                    <button class="tab-btn" onclick="showTab('shop')">Shop</button>
+                    <button class="tab-btn" onclick="showTab('living')">Living</button>
+                    <button class="tab-btn" onclick="showTab('community')">Community</button>
+                </div>
+
+                <div class="action-content" id="actionContent"></div>
+            </div>
+        </div>
+
+        <!-- Bottom Bar -->
+        <div class="bottom-bar">
+            <div id="assignmentStatus">Select actions for all family members</div>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button class="advance-btn" id="repeatBtn" onclick="repeatLastSeason()" style="background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);">
+                    ↻ Repeat Last Season
+                </button>
+                <button class="advance-btn" id="advanceBtn" onclick="advanceSeason()">
+                    Advance to Next Season →
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="modalTitle"></div>
+            <div class="modal-body" id="modalBody"></div>
+            <button class="modal-btn" onclick="closeModal()">Continue</button>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let gameState = {
+            season: 1,
+            year: 1,
+            money: 500, // Matching Ayiti's desperate start - barely enough for 1 season
+            goal: null,
+            livingCondition: 'poor',
+            diplomas: 0,
+            selectedMember: null,
+            currentTab: 'actions',
+            achievements: [],
+            lastSeasonActions: {}, // Track last season's actions for repeat button
+            items: {
+                shoes: false,
+                books: false,
+                radio: false,
+                toys: false,
+                uniform: false,
+                bed: false,
+                plumbing: false,
+                livestock: false,
+                bike: false,
+                computer: false
+            },
+            community: {
+                marketStall: { built: false, progress: 0, cost: 500 },
+                communityCenter: { built: false, progress: 0, required: 15 },
+                library: { built: false, progress: 0, required: 20 },
+                healthCenter: { built: false, progress: 0, required: 25 },
+                soccerField: { built: false, progress: 0, required: 18 }
+            }
+        };
+
+        const family = [
+            { 
+                id: 0,
+                name: "Carlos (Father)", 
+                age: 40, 
+                health: 10, 
+                education: 3, 
+                happiness: 5,
+                emoji: "👨",
+                action: null,
+                diplomas: 0,
+                personality: "hardworking",
+                dream: "own a small business",
+                skills: {
+                    business: 0,
+                    construction: 2,
+                    farming: 3
+                },
+                relationships: { 1: 8, 2: 7, 3: 6, 4: 8 }, // relationship with other family members (0-10)
+                storyMilestones: []
+            },
+            { 
+                id: 1,
+                name: "María (Mother)", 
+                age: 38, 
+                health: 10, 
+                education: 4, 
+                happiness: 5,
+                emoji: "👩",
+                action: null,
+                diplomas: 0,
+                personality: "nurturing",
+                dream: "see her children graduate",
+                skills: {
+                    cooking: 5,
+                    business: 1,
+                    leadership: 2
+                },
+                relationships: { 0: 8, 2: 9, 3: 7, 4: 10 },
+                storyMilestones: []
+            },
+            { 
+                id: 2,
+                name: "Sofía (16)", 
+                age: 16, 
+                health: 10, 
+                education: 6, 
+                happiness: 5,
+                emoji: "👧",
+                action: null,
+                diplomas: 0,
+                personality: "ambitious",
+                dream: "become a teacher",
+                skills: {
+                    teaching: 0,
+                    english: 1,
+                    leadership: 1
+                },
+                relationships: { 0: 7, 1: 9, 3: 6, 4: 8 },
+                storyMilestones: []
+            },
+            { 
+                id: 3,
+                name: "Miguel (14)", 
+                age: 14, 
+                health: 10, 
+                education: 5, 
+                happiness: 5,
+                emoji: "👦",
+                action: null,
+                diplomas: 0,
+                personality: "adventurous",
+                dream: "learn to fix motorcycles",
+                skills: {
+                    mechanic: 0,
+                    soccer: 2,
+                    streetSmart: 1
+                },
+                relationships: { 0: 6, 1: 7, 2: 6, 4: 7 },
+                storyMilestones: []
+            },
+            { 
+                id: 4,
+                name: "Ana (10)", 
+                age: 10, 
+                health: 10, 
+                education: 4, 
+                happiness: 5,
+                emoji: "👧",
+                action: null,
+                diplomas: 0,
+                personality: "curious",
+                dream: "go to university",
+                skills: {
+                    creativity: 2,
+                    technology: 0,
+                    reading: 1
+                },
+                relationships: { 0: 8, 1: 10, 2: 8, 3: 7 },
+                storyMilestones: []
+            }
+        ];
+
+        const seasons = ['Dry Season', 'Rainy Season', 'Hurricane Season', 'Harvest Season'];
+
+        const jobs = [
+            { id: 'farm_labor', name: 'Farm Labor', pay: 60, education: 0, healthCost: 3, icon: '🌾', minAge: 14 },
+            { id: 'light_work', name: 'Light Farm Work', pay: 40, education: 0, healthCost: 2, icon: '🌱', minAge: 14, maxAge: 15, description: 'Light agricultural work for younger teens' },
+            { id: 'construction', name: 'Construction', pay: 110, education: 2, healthCost: 4, icon: '🏗️', adultsOnly: true, requiresBike: true },
+            { id: 'market_vendor', name: 'Market Vendor', pay: 100, education: 3, healthCost: 2, icon: '🛒', gender: ['María (Mother)', 'Sofía (16)'], minAge: 14 },
+            { id: 'mechanic', name: 'Mechanic', pay: 150, education: 6, healthCost: 3, icon: '🔧', minAge: 16 },
+            { id: 'mechanic_assistant', name: 'Mechanic Assistant', pay: 90, education: 4, healthCost: 3, icon: '🔧', minAge: 14, maxAge: 17 },
+            { id: 'secretary', name: 'Secretary', pay: 180, education: 8, healthCost: 1, icon: '💼', minAge: 16 },
+            { id: 'teacher', name: 'Teacher', pay: 220, education: 12, healthCost: 1, icon: '👨‍🏫', adultsOnly: true },
+            { id: 'stall_owner', name: 'Market Stall Owner', pay: 280, education: 0, healthCost: 2, icon: '🏪', requiresStall: true, minAge: 16 }
+        ];
+
+        const schools = [
+            { id: 'public', name: 'Public School', cost: 50, education: 2, healthCost: 1, icon: '🏫', requiresUniform: true },
+            { id: 'private', name: 'Private School', cost: 140, education: 3, healthCost: 0, icon: '🎓' },
+            { id: 'vocational', name: 'Vocational Training', cost: 100, education: 3, healthCost: 1, icon: '⚙️', adults: true },
+            { id: 'night_school', name: 'Night School', cost: 80, education: 2, healthCost: 2, icon: '🌙', adultsOnly: true, description: 'Study after work' }
+        ];
+
+        const healthCare = [
+            { id: 'home_remedy', name: 'Home Remedy', cost: 30, healthGain: 2, icon: '🌿', description: 'Cheap herbs and rest' },
+            { id: 'clinic', name: 'Community Clinic', cost: 80, healthGain: 4, icon: '🏥', description: 'Basic medical care' },
+            { id: 'hospital', name: 'Hospital', cost: 200, healthGain: 8, icon: '🏨', description: 'Full treatment' }
+        ];
+
+        const shopItems = [
+            { id: 'shoes', name: 'Shoes', price: 100, icon: '👟', benefit: '-1 work health cost' },
+            { id: 'books', name: 'Books (per season)', price: 50, icon: '📚', benefit: '+1 education/season', recurring: true },
+            { id: 'uniform', name: 'School Uniform', price: 35, icon: '👕', benefit: 'Required for public school' },
+            { id: 'radio', name: 'Radio', price: 150, icon: '📻', benefit: '+1 happiness' },
+            { id: 'toys', name: 'Toys', price: 120, icon: '🧸', benefit: '+1 happiness (children)' },
+            { id: 'bike', name: 'Bicycle', price: 350, icon: '🚲', benefit: 'Unlock construction job' },
+            { id: 'bed', name: 'Good Bed', price: 700, icon: '🛏️', benefit: '+2 health/season' },
+            { id: 'plumbing', name: 'Indoor Plumbing', price: 800, icon: '🚰', benefit: '+3 health/season' },
+            { id: 'livestock', name: 'Livestock', price: 500, icon: '🐄', benefit: '+80 L/season' },
+            { id: 'computer', name: 'Computer', price: 2500, icon: '💻', benefit: '+2 education/season' }
+        ];
+
+        const livingConditions = [
+            { id: 'poor', name: 'Poor', cost: 75, healthChange: -2, happinessChange: -1 },
+            { id: 'decent', name: 'Decent', cost: 125, healthChange: 0, happinessChange: 0 },
+            { id: 'good', name: 'Good', cost: 175, healthChange: 1, happinessChange: 1 }
+        ];
+
+        const events = [
+            { 
+                text: "Hurricane Eta approaches! Emergency supplies needed.", 
+                type: 'bad', 
+                moneyChange: -800, 
+                healthChange: -4,
+                happinessChange: -3 
+            },
+            { 
+                text: "Dengue fever outbreak in the community. Medical costs rise.", 
+                type: 'bad', 
+                moneyChange: -600, 
+                healthChange: -5 
+            },
+            { 
+                text: "Gang violence increases. Extra security needed.", 
+                type: 'bad', 
+                moneyChange: -400, 
+                happinessChange: -3 
+            },
+            { 
+                text: "Coffee harvest brings extra work!", 
+                type: 'good', 
+                moneyChange: 500 
+            },
+            { 
+                text: "NGO provides free health clinic!", 
+                type: 'good', 
+                healthChange: 3 
+            },
+            { 
+                text: "Scholarship opportunity for one student!", 
+                type: 'good', 
+                educationChange: 2 
+            },
+            { 
+                text: "Political protests disrupt work and school.", 
+                type: 'bad', 
+                moneyChange: -300, 
+                educationChange: -1 
+            },
+            { 
+                text: "Power outages last for days.", 
+                type: 'bad', 
+                healthChange: -2, 
+                educationChange: -1,
+                happinessChange: -2 
+            },
+            { 
+                text: "Community fundraiser for school supplies!", 
+                type: 'good', 
+                moneyChange: 250 
+            },
+            { 
+                text: "Someone gifts you food supplies!", 
+                type: 'good', 
+                moneyChange: 200,
+                happinessChange: 1 
+            },
+            { 
+                text: "A family member contracts chikungunya.", 
+                type: 'bad', 
+                healthChange: -6,
+                moneyChange: -500 
+            },
+            { 
+                text: "Robbery! Thieves break in during the night.", 
+                type: 'bad',
+                moneyChange: -400,
+                happinessChange: -2
+            },
+            { 
+                text: "Peaceful season - no major problems!", 
+                type: 'neutral' 
+            }
+        ];
+
+        // POSITIVE ENCOUNTER EVENTS - Hope and excitement!
+        const positiveEvents = [
+            {
+                text: "A tourist asks Carlos for directions and tips him generously!",
+                type: 'joy',
+                targetMember: 0,
+                moneyChange: 150,
+                happinessChange: 2
+            },
+            {
+                text: "Miguel's soccer team wins the regional tournament! He's offered a sports scholarship!",
+                type: 'joy',
+                targetMember: 3,
+                condition: (m) => m.skills.soccer >= 3,
+                moneyChange: 300,
+                happinessChange: 3,
+                skillBoost: { soccer: 1 }
+            },
+            {
+                text: "Ana's artwork wins the school competition! She receives a prize!",
+                type: 'joy',
+                targetMember: 4,
+                condition: (m) => m.skills.creativity >= 3,
+                moneyChange: 200,
+                happinessChange: 3,
+                skillBoost: { creativity: 1 }
+            },
+            {
+                text: "María makes a friend at work who tells her about a better-paying position!",
+                type: 'joy',
+                targetMember: 1,
+                condition: (m) => m.action?.type === 'work',
+                happinessChange: 2,
+                message: "New job opportunity unlocked next season!"
+            },
+            {
+                text: "The family finds 150 Lempiras hidden in an old coat!",
+                type: 'joy',
+                moneyChange: 150,
+                happinessChange: 1
+            },
+            {
+                text: "Sofía tutors a neighbor's child and is paid for her help!",
+                type: 'joy',
+                targetMember: 2,
+                condition: (m) => m.skills.teaching >= 2,
+                moneyChange: 100,
+                happinessChange: 2,
+                skillBoost: { teaching: 1 }
+            },
+            {
+                text: "Don Julio offers to teach Miguel advanced mechanics for free!",
+                type: 'joy',
+                targetMember: 3,
+                condition: (m) => m.skills.mechanic >= 2,
+                happinessChange: 3,
+                skillBoost: { mechanic: 2 },
+                message: "Miguel is learning fast!"
+            },
+            {
+                text: "A kind neighbor gifts the family fresh vegetables from their garden!",
+                type: 'joy',
+                moneyChange: 80,
+                healthChange: 1,
+                happinessChange: 2
+            },
+            {
+                text: "Carlos fixes a wealthy person's car and receives a generous tip!",
+                type: 'joy',
+                targetMember: 0,
+                condition: (m) => m.skills.construction >= 3,
+                moneyChange: 250,
+                happinessChange: 2
+            },
+            {
+                text: "The church organizes a free community meal - everyone's spirits lift!",
+                type: 'joy',
+                happinessChange: 2,
+                message: "The community comes together in solidarity."
+            }
+        ];
+
+        // Character dialogue events - BitLife style with choices!
+        const characterDialogues = [
+            // Carlos (Father) dialogues
+            {
+                character: 0,
+                condition: (member) => member.health < 5,
+                dialogue: "Papá, I'm so tired... My back hurts from all the work, but we need the money. Should I keep pushing through?",
+                emoji: "😰",
+                choices: [
+                    { 
+                        text: "Rest this season, your health matters", 
+                        effect: { forceRest: true, happinessChange: 2, message: "Carlos appreciates your concern for his wellbeing" }
+                    },
+                    { 
+                        text: "The family needs you to keep working", 
+                        effect: { happinessChange: -2, message: "Carlos looks defeated but nods" }
+                    }
+                ]
+            },
+            {
+                character: 0,
+                condition: (member) => member.happiness < 3 && gameState.money < 500,
+                dialogue: "I feel like I'm failing you all. No matter how hard I work, we're barely getting by. What kind of father can't provide?",
+                emoji: "😔",
+                choices: [
+                    { 
+                        text: "You're doing your best, we'll get through this together", 
+                        effect: { happinessChange: 2, message: "Carlos feels encouraged and motivated" }
+                    },
+                    { 
+                        text: "We need you to work harder", 
+                        effect: { happinessChange: -3, healthChange: -1, message: "Carlos looks crushed by the pressure" }
+                    }
+                ]
+            },
+            {
+                character: 0,
+                condition: (member) => gameState.money > 1000 && !gameState.community.marketStall.built,
+                dialogue: "I've been thinking... If we could buy that market stall, I could run a steady business. It's my dream to be my own boss. What do you think?",
+                emoji: "💭",
+                choices: [
+                    { 
+                        text: "Let's save up and buy it! (Save for stall)", 
+                        effect: { happinessChange: 3, message: "Carlos is excited about the future!" }
+                    },
+                    { 
+                        text: "It's too risky right now", 
+                        effect: { happinessChange: -1, message: "Carlos understands but looks disappointed" }
+                    }
+                ]
+            },
+
+            // María (Mother) dialogues
+            {
+                character: 1,
+                condition: (member) => family.filter(m => m.education < 5 && m.age < 18).length > 1,
+                dialogue: "I worry about our children's education every day. I never got to finish school... I don't want that for them. Can we prioritize their schooling?",
+                emoji: "😢",
+                choices: [
+                    { 
+                        text: "You're right, education is their future", 
+                        effect: { happinessChange: 3, message: "María smiles with hope in her eyes" }
+                    },
+                    { 
+                        text: "We need them working to survive", 
+                        effect: { happinessChange: -3, message: "María's heart breaks a little" }
+                    }
+                ]
+            },
+            {
+                character: 1,
+                condition: (member) => member.education >= 8 && !member.action,
+                dialogue: "You know... I've been studying so much. I think I could work as a secretary now! It would mean better pay for our family.",
+                emoji: "😊",
+                choices: [
+                    { 
+                        text: "I'm so proud of you! Go for it!", 
+                        effect: { happinessChange: 3, message: "María beams with pride and confidence" }
+                    },
+                    { 
+                        text: "Let's think about it more", 
+                        effect: { happinessChange: -1, message: "María nods but looks uncertain" }
+                    }
+                ]
+            },
+            {
+                character: 1,
+                condition: (member) => family.filter(m => m.health < 5).length >= 2,
+                dialogue: "Everyone is getting sick... Maybe our living conditions are too poor? I'm scared someone will get really ill. Should we improve how we live?",
+                emoji: "😰",
+                choices: [
+                    { 
+                        text: "You're right, let's improve our living conditions", 
+                        effect: { happinessChange: 2, message: "María feels relieved you're listening" }
+                    },
+                    { 
+                        text: "We can't afford it right now", 
+                        effect: { happinessChange: -1, message: "María worries quietly" }
+                    }
+                ]
+            },
+
+            // Sofía (16) dialogues
+            {
+                character: 2,
+                condition: (member) => member.education >= 10 && member.happiness > 6,
+                dialogue: "Mamá, Papá... I got the highest grades in my class! My teacher says I could become a teacher myself one day. That's my dream!",
+                emoji: "🤩",
+                choices: [
+                    { 
+                        text: "We're so proud! Keep studying!", 
+                        effect: { happinessChange: 3, educationChange: 1, message: "Sofía is glowing with motivation!" }
+                    },
+                    { 
+                        text: "That's nice, but focus on practical work", 
+                        effect: { happinessChange: -3, message: "Sofía's smile fades" }
+                    }
+                ]
+            },
+            {
+                character: 2,
+                condition: (member) => member.action?.type === 'work' && member.age === 16,
+                dialogue: "I see my friends going to school while I work... I know we need money, but I'm scared I'll never achieve my dreams if I don't get educated.",
+                emoji: "😢",
+                choices: [
+                    { 
+                        text: "Next season, we'll prioritize your education", 
+                        effect: { happinessChange: 2, message: "Sofía hugs you tightly, hope in her eyes" }
+                    },
+                    { 
+                        text: "Your work helps feed the family", 
+                        effect: { happinessChange: -2, message: "Sofía quietly accepts her fate" }
+                    }
+                ]
+            },
+            {
+                character: 2,
+                condition: (member) => member.health < 4 && member.action?.type === 'work',
+                dialogue: "I'm exhausted... The work at the market is so hard, and I'm not feeling well. Can I please rest?",
+                emoji: "😰",
+                choices: [
+                    { 
+                        text: "Of course, your health comes first", 
+                        effect: { forceRest: true, happinessChange: 2, message: "Sofía looks relieved and grateful" }
+                    },
+                    { 
+                        text: "Push through, we need the income", 
+                        effect: { happinessChange: -2, healthChange: -1, message: "Sofía fights back tears" }
+                    }
+                ]
+            },
+
+            // Miguel (14) dialogues
+            {
+                character: 3,
+                condition: (member) => member.age === 14 && member.action?.type === 'work',
+                dialogue: "I'm working now! I feel like a grown-up helping the family. But... sometimes I miss just being a kid. Is it okay if I feel this way?",
+                emoji: "😕",
+                choices: [
+                    { 
+                        text: "You're still a kid, it's okay to miss playtime", 
+                        effect: { happinessChange: 2, message: "Miguel smiles, relieved you understand" }
+                    },
+                    { 
+                        text: "You need to grow up fast in this world", 
+                        effect: { happinessChange: -2, message: "Miguel's childhood fades a bit more" }
+                    }
+                ]
+            },
+            {
+                character: 3,
+                condition: (member) => member.education >= 6 && gameState.items.bike,
+                dialogue: "I've been watching Don Julio fix motorcycles! If I could learn mechanics, I could earn good money and do something I love. Can I train?",
+                emoji: "😃",
+                choices: [
+                    { 
+                        text: "Yes! Follow your passion for mechanics!", 
+                        effect: { happinessChange: 3, message: "Miguel is thrilled and motivated!" }
+                    },
+                    { 
+                        text: "Focus on general education instead", 
+                        effect: { happinessChange: -1, message: "Miguel is disappointed but obeys" }
+                    }
+                ]
+            },
+            {
+                character: 3,
+                condition: (member) => member.happiness < 4,
+                dialogue: "All I do is work or study... I never get to play fútbol with my friends anymore. I miss being happy.",
+                emoji: "😞",
+                choices: [
+                    { 
+                        text: "Let's make sure you have more free time", 
+                        effect: { happinessChange: 3, message: "Miguel's face lights up!" }
+                    },
+                    { 
+                        text: "Life is hard, you'll understand when you're older", 
+                        effect: { happinessChange: -1, message: "Miguel looks down at the ground" }
+                    }
+                ]
+            },
+
+            // Ana (10) dialogues
+            {
+                character: 4,
+                condition: (member) => member.education >= 6 && member.happiness > 5,
+                dialogue: "Teacher said I'm the smartest in my class! She says if I keep studying, I could go to university! Can I really go to university one day?",
+                emoji: "✨",
+                choices: [
+                    { 
+                        text: "Yes mija, we'll do everything to make it happen!", 
+                        effect: { happinessChange: 3, educationChange: 1, message: "Ana bounces with joy and determination!" }
+                    },
+                    { 
+                        text: "University is very expensive, don't get your hopes up", 
+                        effect: { happinessChange: -3, message: "Ana's dreams are crushed" }
+                    }
+                ]
+            },
+            {
+                character: 4,
+                condition: (member) => !gameState.items.toys && member.happiness < 5,
+                dialogue: "All my friends have toys to play with... I know we don't have money, but can we get something? Even something small?",
+                emoji: "🥺",
+                choices: [
+                    { 
+                        text: "We'll save up for toys, I promise", 
+                        effect: { happinessChange: 2, message: "Ana hugs you and says 'Thank you!'" }
+                    },
+                    { 
+                        text: "Toys are a luxury we can't afford", 
+                        effect: { happinessChange: -2, message: "Ana tries not to cry" }
+                    }
+                ]
+            },
+            {
+                character: 4,
+                condition: (member) => family.filter(m => m.action?.type === 'school').length === 0 && member.age === 10,
+                dialogue: "Why is nobody going to school anymore? My teacher says education is important... Are we going to be okay?",
+                emoji: "😰",
+                choices: [
+                    { 
+                        text: "You're right, education matters. We'll send people to school", 
+                        effect: { happinessChange: 2, message: "Ana feels reassured" }
+                    },
+                    { 
+                        text: "We have to focus on surviving right now", 
+                        effect: { happinessChange: -1, message: "Ana looks confused and scared" }
+                    }
+                ]
+            },
+
+            // Multiple family member scenarios
+            {
+                character: null, // Any family member can trigger
+                condition: () => gameState.diplomas >= 1 && gameState.money > 800,
+                dialogue: "The whole family is celebrating! Someone earned a diploma! Should we have a small celebration?",
+                emoji: "🎉",
+                choices: [
+                    { 
+                        text: "Yes! Let's celebrate this achievement! (-150 L)", 
+                        effect: { moneyChange: -150, happinessChangeAll: 2, message: "The whole family feels joy and pride!" }
+                    },
+                    { 
+                        text: "We should save the money", 
+                        effect: { happinessChangeAll: -1, message: "The celebration is bittersweet" }
+                    }
+                ]
+            },
+            {
+                character: null,
+                condition: () => gameState.livingCondition === 'poor' && family.every(m => m.health < 6),
+                dialogue: "Everyone is sick and weak. The family looks at you, waiting for guidance. What should we do?",
+                emoji: "😷",
+                choices: [
+                    { 
+                        text: "Everyone rest this season, no work", 
+                        effect: { forceRestAll: true, happinessChangeAll: 1, message: "The family recovers together" }
+                    },
+                    { 
+                        text: "Push through, we need to survive", 
+                        effect: { healthChangeAll: -1, happinessChangeAll: -1, message: "The family struggles on" }
+                    }
+                ]
+            }
+        ];
+
+        // Start Screen Functions
+        let selectedGoal = null;
+
+        function selectGoal(goal) {
+            selectedGoal = goal;
+            document.querySelectorAll('.goal-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            document.getElementById('startGameBtn').disabled = false;
+        }
+
+        function startGame() {
+            gameState.goal = selectedGoal;
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'block';
+            
+            const goalNames = {
+                education: '📚 EDUCATION',
+                money: '💰 MAKE MONEY',
+                health: '❤️ STAY HEALTHY',
+                happiness: '😊 HAPPINESS'
+            };
+            document.getElementById('goalDisplay').textContent = 'Goal: ' + goalNames[selectedGoal];
+            
+            renderFamily();
+            updateStats();
+            showTab('actions');
+        }
+
+        // Render Functions
+        function renderFamily() {
+            const container = document.getElementById('familyPanel');
+            container.innerHTML = '<h3 style="margin-bottom: 15px; color: #0073cf;">The Rodríguez Family</h3>';
+            
+            family.forEach(member => {
+                const memberDiv = document.createElement('div');
+                memberDiv.className = 'family-member' + (gameState.selectedMember === member.id ? ' selected' : '');
+                memberDiv.onclick = () => selectMember(member.id);
+                
+                memberDiv.innerHTML = `
+                    <div class="member-avatar">${member.emoji}</div>
+                    <div class="member-name">${member.name}</div>
+                    <div class="member-bars">
+                        <div class="bar-container">
+                            <div class="bar-label">
+                                <span>Health</span>
+                                <span>${member.health}/10</span>
+                            </div>
+                            <div class="bar">
+                                <div class="bar-fill health-fill" style="width: ${(member.health/10)*100}%"></div>
+                            </div>
+                        </div>
+                        <div class="bar-container">
+                            <div class="bar-label">
+                                <span>Education</span>
+                                <span>${member.education}/15</span>
+                            </div>
+                            <div class="bar">
+                                <div class="bar-fill education-fill" style="width: ${(member.education/15)*100}%"></div>
+                            </div>
+                        </div>
+                        <div class="bar-container">
+                            <div class="bar-label">
+                                <span>Happiness</span>
+                                <span>${member.happiness}/10</span>
+                            </div>
+                            <div class="bar">
+                                <div class="bar-fill happiness-fill" style="width: ${(member.happiness/10)*100}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    ${gameState.selectedMember === member.id ? `
+                        <div class="skills-panel">
+                            <div style="font-weight: bold; margin-bottom: 8px; font-size: 0.85em; color: #0073cf;">💫 Skills</div>
+                            ${Object.entries(member.skills).map(([skill, level]) => `
+                                <div class="skill-item">
+                                    <div class="skill-name">
+                                        ${skill} ${level.toFixed(1)}/10
+                                        ${getSkillBonus(member, skill) > 0 ? ` 💰 +${Math.floor(getSkillBonus(member, skill) * 100)}% pay` : ''}
+                                    </div>
+                                    <div class="skill-bar">
+                                        <div class="skill-fill" style="width: ${(level/10)*100}%"></div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    <div class="member-status">
+                        ${member.action ? 'Assigned: ' + getActionName(member.action) : 'No action assigned'}
+                        ${member.diplomas > 0 ? `<br>🎓 ${member.diplomas} diploma(s)` : ''}
+                    </div>
+                `;
+                container.appendChild(memberDiv);
+            });
+        }
+
+        function getSkillBonus(member, skillName) {
+            // Returns the pay bonus percentage for a given skill (0 to 0.5 = 0% to 50%)
+            const level = member.skills[skillName] || 0;
+            
+            if (skillName === 'construction' || skillName === 'mechanic') {
+                return level / 20; // Up to +50% at level 10
+            } else if (skillName === 'business') {
+                return level / 15; // Up to +66% at level 10
+            } else if (skillName === 'teaching') {
+                return level / 25; // Up to +40% at level 10
+            } else if (skillName === 'farming') {
+                return level / 30; // Up to +33% at level 10
+            }
+            return 0;
+        }
+
+        function getActionName(action) {
+            if (!action) return 'None';
+            if (action.type === 'work') {
+                const job = jobs.find(j => j.id === action.id);
+                return job ? job.name : 'Work';
+            } else if (action.type === 'school') {
+                const school = schools.find(s => s.id === action.id);
+                return school ? school.name : 'School';
+            } else if (action.type === 'rest') {
+                return 'Rest at Home';
+            } else if (action.type === 'volunteer') {
+                return 'Volunteer Work';
+            }
+            return 'Unknown';
+        }
+
+        function selectMember(id) {
+            gameState.selectedMember = id;
+            renderFamily();
+            if (gameState.currentTab === 'actions') {
+                showTab('actions');
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('seasonDisplay').textContent = `${gameState.season} / 16`;
+            document.getElementById('moneyDisplay').textContent = `${gameState.money} L`;
+            document.getElementById('livingDisplay').textContent = gameState.livingCondition.charAt(0).toUpperCase() + gameState.livingCondition.slice(1);
+            document.getElementById('diplomaDisplay').textContent = gameState.diplomas;
+            document.getElementById('achievementDisplay').textContent = gameState.achievements.length;
+            
+            const seasonNames = seasons[(gameState.season - 1) % 4];
+            document.getElementById('seasonTitle').textContent = `${seasonNames} - Year ${gameState.year}`;
+            
+            updateAssignmentStatus();
+        }
+
+        function updateAssignmentStatus() {
+            const unassigned = family.filter(m => !m.action).length;
+            const status = document.getElementById('assignmentStatus');
+            if (unassigned === 0) {
+                status.textContent = '✓ All family members assigned';
+                status.style.color = '#28a745';
+            } else {
+                status.textContent = `${unassigned} family member(s) need assignment`;
+                status.style.color = '#f5576c';
+            }
+        }
+
+        // Tab Functions
+        function showTab(tab) {
+            gameState.currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const content = document.getElementById('actionContent');
+            content.innerHTML = '';
+            
+            if (tab === 'actions') {
+                renderActions(content);
+            } else if (tab === 'healthcare') {
+                renderHealthcare(content);
+            } else if (tab === 'shop') {
+                renderShop(content);
+            } else if (tab === 'living') {
+                renderLiving(content);
+            } else if (tab === 'community') {
+                renderCommunity(content);
+            }
+        }
+
+        function renderHealthcare(container) {
+            container.innerHTML = '<h3 style="margin-bottom: 20px;">🏥 Healthcare - Treat Sick Family Members</h3>';
+            
+            const sickMembers = family.filter(m => m.health < 8);
+            
+            if (sickMembers.length === 0) {
+                container.innerHTML += '<p style="text-align: center; padding: 40px; color: #28a745; font-size: 1.2em;">✓ Everyone is healthy! No treatment needed.</p>';
+                return;
+            }
+            
+            container.innerHTML += '<p style="margin-bottom: 20px; color: #6c757d;">Select a family member and choose treatment:</p>';
+            
+            sickMembers.forEach(member => {
+                const memberSection = document.createElement('div');
+                memberSection.style.marginBottom = '30px';
+                memberSection.style.padding = '20px';
+                memberSection.style.background = '#fff';
+                memberSection.style.borderRadius = '15px';
+                memberSection.style.border = '2px solid #dee2e6';
+                
+                const statusColor = member.health <= 2 ? '#dc3545' : member.health <= 5 ? '#ffc107' : '#6c757d';
+                const statusText = member.health <= 2 ? '⚠️ CRITICAL' : member.health <= 5 ? '🤒 SICK' : '😷 UNWELL';
+                
+                memberSection.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div>
+                            <span style="font-size: 2em; margin-right: 10px;">${member.emoji}</span>
+                            <strong style="font-size: 1.2em;">${member.name}</strong>
+                        </div>
+                        <div style="color: ${statusColor}; font-weight: bold; font-size: 1.1em;">${statusText} (${member.health}/10)</div>
+                    </div>
+                `;
+                
+                const treatmentGrid = document.createElement('div');
+                treatmentGrid.className = 'action-grid';
+                treatmentGrid.style.marginTop = '15px';
+                
+                healthCare.forEach(treatment => {
+                    const canAfford = gameState.money >= treatment.cost;
+                    const card = document.createElement('div');
+                    card.className = 'action-card' + (!canAfford ? ' disabled' : '');
+                    
+                    if (canAfford) {
+                        card.onclick = () => applyHealthcare(member.id, treatment);
+                    }
+                    
+                    card.innerHTML = `
+                        <div class="action-icon">${treatment.icon}</div>
+                        <div class="action-name">${treatment.name}</div>
+                        <div class="action-details">${treatment.description}</div>
+                        <div class="action-benefit">+${treatment.healthGain} health</div>
+                        <div class="action-cost">-${treatment.cost} L</div>
+                        ${!canAfford ? '<div style="color: #dc3545; margin-top: 5px; font-size: 0.8em;">Cannot afford</div>' : ''}
+                    `;
+                    treatmentGrid.appendChild(card);
+                });
+                
+                memberSection.appendChild(treatmentGrid);
+                container.appendChild(memberSection);
+            });
+        }
+
+        function applyHealthcare(memberId, treatment) {
+            if (gameState.money < treatment.cost) return;
+            
+            const member = family[memberId];
+            gameState.money -= treatment.cost;
+            member.health = Math.min(10, member.health + treatment.healthGain);
+            
+            showModal('💊 Treatment Applied', `${member.name.split('(')[0].trim()} received ${treatment.name} and feels better! Health: ${member.health}/10`);
+            renderHealthcare(document.getElementById('actionContent'));
+            updateStats();
+            renderFamily();
+        }
+
+        function renderActions(container) {
+            if (gameState.selectedMember === null) {
+                container.innerHTML = '<p style="text-align: center; padding: 40px; color: #6c757d;">← Select a family member to assign actions</p>';
+                return;
+            }
+            
+            const member = family[gameState.selectedMember];
+            container.innerHTML = `<h3 style="margin-bottom: 20px;">Actions for ${member.name}</h3>`;
+            
+            const grid = document.createElement('div');
+            grid.className = 'action-grid';
+            
+            // Work options
+            jobs.forEach(job => {
+                // Honduras labor law: Under 14 cannot work, 14-15 can do light work with restrictions, 16+ can work, adults-only for hazardous
+                const meetsAgeMin = !job.minAge || member.age >= job.minAge;
+                const meetsAgeMax = !job.maxAge || member.age <= job.maxAge;
+                const meetsAdultRequirement = !job.adultsOnly || member.age >= 18;
+                const underFourteenCannotWork = member.age < 14;
+                
+                const canWork = !underFourteenCannotWork &&
+                               meetsAgeMin &&
+                               meetsAgeMax &&
+                               meetsAdultRequirement &&
+                               member.education >= job.education && 
+                               (!job.gender || job.gender.includes(member.name)) &&
+                               (!job.requiresStall || gameState.community.marketStall.built) &&
+                               (gameState.items.bike || !job.requiresBike) &&
+                               member.health > 2;
+                
+                let disabledReason = '';
+                if (underFourteenCannotWork) {
+                    disabledReason = 'Too young to work (under 14)';
+                } else if (!meetsAgeMin) {
+                    disabledReason = 'Too young for this job';
+                } else if (!meetsAgeMax) {
+                    disabledReason = 'Too old for this job';
+                } else if (!meetsAdultRequirement) {
+                    disabledReason = 'Adults only (hazardous work)';
+                } else if (member.education < job.education) {
+                    disabledReason = 'Need education: ' + job.education;
+                } else if (job.requiresStall && !gameState.community.marketStall.built) {
+                    disabledReason = 'Need Market Stall';
+                } else if (job.requiresBike && !gameState.items.bike) {
+                    disabledReason = 'Need Bicycle';
+                } else if (member.health <= 2) {
+                    disabledReason = 'Too sick to work';
+                } else if (job.gender && !job.gender.includes(member.name)) {
+                    disabledReason = 'Not available';
+                }
+                
+                const card = document.createElement('div');
+                card.className = 'action-card' + (!canWork ? ' disabled' : '') + 
+                                (member.action && member.action.type === 'work' && member.action.id === job.id ? ' selected' : '');
+                
+                if (canWork) {
+                    card.onclick = () => assignAction(member.id, { type: 'work', id: job.id });
+                }
+                
+                card.innerHTML = `
+                    <div class="action-icon">${job.icon}</div>
+                    <div class="action-name">${job.name}</div>
+                    <div class="action-details">
+                        ${!canWork ? disabledReason : (job.description || '')}
+                    </div>
+                    <div class="action-benefit">+${job.pay} L</div>
+                    <div class="action-cost">-${job.healthCost} health</div>
+                `;
+                grid.appendChild(card);
+            });
+            
+            // School options
+            schools.forEach(school => {
+                const needsUniform = school.requiresUniform && !gameState.items.uniform;
+                const isAdult = member.age >= 18;
+                const meetsAdultRequirement = !school.adultsOnly || isAdult;
+                
+                const canStudy = (!school.adults || member.age >= 16) && 
+                               meetsAdultRequirement &&
+                               member.age <= 25 &&
+                               member.education < 15 &&
+                               gameState.money >= school.cost &&
+                               !needsUniform;
+                
+                const card = document.createElement('div');
+                card.className = 'action-card' + (!canStudy ? ' disabled' : '') +
+                                (member.action && member.action.type === 'school' && member.action.id === school.id ? ' selected' : '');
+                
+                if (canStudy) {
+                    card.onclick = () => assignAction(member.id, { type: 'school', id: school.id });
+                }
+                
+                card.innerHTML = `
+                    <div class="action-icon">${school.icon}</div>
+                    <div class="action-name">${school.name}</div>
+                    <div class="action-details">
+                        ${school.description || ''}
+                        ${!canStudy ? (needsUniform ? '<br>Need school uniform' :
+                                      gameState.money < school.cost ? '<br>Not enough money' : 
+                                      school.adultsOnly && !isAdult ? '<br>Adults only (18+)' :
+                                      school.adults && member.age < 16 ? '<br>Ages 16+ only' :
+                                      member.education >= 15 ? '<br>Fully educated' :
+                                      '<br>Not available') : ''}
+                    </div>
+                    <div class="action-benefit">+${school.education} education</div>
+                    <div class="action-cost">-${school.cost} L, -${school.healthCost} health</div>
+                `;
+                grid.appendChild(card);
+            });
+            
+            // Volunteer
+            const card = document.createElement('div');
+            card.className = 'action-card' + (member.action && member.action.type === 'volunteer' ? ' selected' : '');
+            card.onclick = () => assignAction(member.id, { type: 'volunteer' });
+            card.innerHTML = `
+                <div class="action-icon">🤝</div>
+                <div class="action-name">Volunteer Work</div>
+                <div class="action-details">Help build community</div>
+                <div class="action-benefit">+1 education, +1 happiness</div>
+                <div class="action-cost">Free</div>
+            `;
+            grid.appendChild(card);
+            
+            // Rest
+            const restCard = document.createElement('div');
+            restCard.className = 'action-card' + (member.action && member.action.type === 'rest' ? ' selected' : '');
+            restCard.onclick = () => assignAction(member.id, { type: 'rest' });
+            restCard.innerHTML = `
+                <div class="action-icon">🏠</div>
+                <div class="action-name">Rest at Home</div>
+                <div class="action-details">Recover health</div>
+                <div class="action-benefit">+3 health, +1 happiness</div>
+                <div class="action-cost">Free</div>
+            `;
+            grid.appendChild(restCard);
+            
+            container.appendChild(grid);
+        }
+
+        function assignAction(memberId, action) {
+            console.log('assignAction called:', memberId, action);
+            const member = family[memberId];
+            
+            // Check if member is dead
+            if (member.health <= 0) {
+                showModal('Cannot Assign', `${member.name.split('(')[0].trim()} has passed away and cannot be assigned actions.`);
+                return;
+            }
+            
+            // HONDURAS REALITY: If critically ill (health ≤ 2), cannot work - only rest, school, or volunteer
+            if (member.health <= 2 && action.type === 'work') {
+                showModal('❌ Too Sick to Work', `${member.name.split('(')[0].trim()} is critically ill (health ${member.health}/10).\n\nIn Honduras, workers this sick cannot physically work - they need rest or medical treatment.\n\nChoose: Rest, School, Volunteer, or treat them in the Healthcare tab.`);
+                return;
+            }
+            
+            console.log('About to check intensity modal:', action.type);
+            // Show intensity selection modal for work and school
+            if (action.type === 'work' || action.type === 'school') {
+                console.log('Calling showIntensityModal');
+                showIntensityModal(memberId, action);
+            } else {
+                console.log('Direct assignment');
+                member.action = action;
+                renderFamily();
+                updateAssignmentStatus();
+                if (gameState.currentTab === 'actions') {
+                    renderActions(document.getElementById('actionContent'));
+                }
+            }
+        }
+
+        let tempActionForIntensity = null; // Store action temporarily for intensity selection
+
+        function showIntensityModal(memberId, baseAction) {
+            console.log('showIntensityModal called:', memberId, baseAction);
+            const member = family[memberId];
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody'); // FIXED: was modalText, should be modalBody
+            
+            // Store action for selectIntensity to use
+            tempActionForIntensity = { memberId, baseAction };
+            console.log('Stored tempActionForIntensity:', tempActionForIntensity);
+            
+            let intensityOptions = '';
+            
+            if (baseAction.type === 'work') {
+                const job = jobs.find(j => j.id === baseAction.id);
+                
+                // Honduras context: Standard 44hr week vs overtime culture in maquilas
+                intensityOptions = `
+                    <div style="margin-bottom: 20px; padding: 15px; background: #e3f2fd; border-radius: 10px; text-align: left;">
+                        <strong>🇭🇳 Honduras Work Culture:</strong> Standard work week is 44 hours. Many Hondurans work overtime (50-60+ hours) for 125-175% pay, but this causes exhaustion, injuries, and health problems - especially in maquilas (factories).
+                    </div>
+                    <div style="display: grid; gap: 15px;">
+                        <button class="choice-btn" onclick="selectIntensity('easy')" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);">
+                            <div style="font-size: 1.2em; margin-bottom: 5px;">🟢 Take it Easy</div>
+                            <div style="font-size: 0.9em; opacity: 0.9;">Standard 44-hour week, normal pace</div>
+                            <div style="margin-top: 8px;">
+                                <strong>Pay:</strong> ${Math.floor(job.pay * 0.75)} L (75%)<br>
+                                <strong>Health cost:</strong> -${Math.max(1, job.healthCost - 1)}<br>
+                                <strong>Best for:</strong> Sick or exhausted workers
+                            </div>
+                        </button>
+                        
+                        <button class="choice-btn" onclick="selectIntensity('normal')" style="background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);">
+                            <div style="font-size: 1.2em; margin-bottom: 5px;">🟡 Work Normally</div>
+                            <div style="font-size: 0.9em; opacity: 0.9;">Full expectations, full pay</div>
+                            <div style="margin-top: 8px;">
+                                <strong>Pay:</strong> ${job.pay} L (100%)<br>
+                                <strong>Health cost:</strong> -${job.healthCost}<br>
+                                <strong>Best for:</strong> Healthy workers
+                            </div>
+                        </button>
+                        
+                        <button class="choice-btn" onclick="selectIntensity('hard')" style="background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);">
+                            <div style="font-size: 1.2em; margin-bottom: 5px;">🔴 Work Hard (Overtime)</div>
+                            <div style="font-size: 0.9em; opacity: 0.9;">50-60 hour weeks, fast pace (maquila reality)</div>
+                            <div style="margin-top: 8px;">
+                                <strong>Pay:</strong> ${Math.floor(job.pay * 1.3)} L (+30% overtime pay)<br>
+                                <strong>Health cost:</strong> -${job.healthCost + 2}<br>
+                                <strong>⚠️ Warning:</strong> High risk of injury and burnout
+                            </div>
+                        </button>
+                    </div>
+                `;
+                modalTitle.textContent = `${job.icon} ${job.name} - Choose Work Intensity`;
+            } else if (baseAction.type === 'school') {
+                const school = schools.find(s => s.id === baseAction.id);
+                
+                intensityOptions = `
+                    <div style="margin-bottom: 20px; padding: 15px; background: #fff3e0; border-radius: 10px; text-align: left;">
+                        <strong>📚 Study Intensity:</strong> In Honduras, students who study harder advance faster, but intense studying without rest causes stress and exhaustion.
+                    </div>
+                    <div style="display: grid; gap: 15px;">
+                        <button class="choice-btn" onclick="selectIntensity('easy')" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);">
+                            <div style="font-size: 1.2em; margin-bottom: 5px;">🟢 Study Lightly</div>
+                            <div style="font-size: 0.9em; opacity: 0.9;">Relaxed pace, less pressure</div>
+                            <div style="margin-top: 8px;">
+                                <strong>Education:</strong> +${Math.max(1, school.education - 1)}<br>
+                                <strong>Health cost:</strong> -${Math.max(0, school.healthCost - 1)}<br>
+                                <strong>Best for:</strong> Tired or sick students
+                            </div>
+                        </button>
+                        
+                        <button class="choice-btn" onclick="selectIntensity('normal')" style="background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);">
+                            <div style="font-size: 1.2em; margin-bottom: 5px;">🟡 Study Normally</div>
+                            <div style="font-size: 0.9em; opacity: 0.9;">Balanced study habits</div>
+                            <div style="margin-top: 8px;">
+                                <strong>Education:</strong> +${school.education}<br>
+                                <strong>Health cost:</strong> -${school.healthCost}<br>
+                                <strong>Best for:</strong> Healthy students
+                            </div>
+                        </button>
+                        
+                        <button class="choice-btn" onclick="selectIntensity('hard')" style="background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);">
+                            <div style="font-size: 1.2em; margin-bottom: 5px;">🔵 Study Hard</div>
+                            <div style="font-size: 0.9em; opacity: 0.9;">Extra hours, late nights, intense focus</div>
+                            <div style="margin-top: 8px;">
+                                <strong>Education:</strong> +${school.education + 1}<br>
+                                <strong>Health cost:</strong> -${school.healthCost + 1}<br>
+                                <strong>Best for:</strong> Dedicated students racing to graduate
+                            </div>
+                        </button>
+                    </div>
+                `;
+                modalTitle.textContent = `${school.icon} ${school.name} - Choose Study Intensity`;
+            }
+            
+            modalBody.innerHTML = intensityOptions;
+            modal.style.display = 'flex';
+        }
+
+        function selectIntensity(intensity) {
+            console.log('selectIntensity called:', intensity);
+            console.log('tempActionForIntensity:', tempActionForIntensity);
+            
+            if (!tempActionForIntensity) {
+                console.error('No tempActionForIntensity!');
+                return;
+            }
+            
+            const { memberId, baseAction } = tempActionForIntensity;
+            const member = family[memberId];
+            const action = { ...baseAction, intensity: intensity };
+            
+            console.log('Assigning action:', action, 'to member:', memberId);
+            member.action = action;
+            tempActionForIntensity = null; // Clear temp storage
+            
+            closeModal();
+            renderFamily();
+            updateAssignmentStatus();
+            if (gameState.currentTab === 'actions') {
+                renderActions(document.getElementById('actionContent'));
+            }
+        }
+
+        function renderShop(container) {
+            container.innerHTML = '<h3 style="margin-bottom: 20px;">Shop - Buy Items to Help Your Family</h3>';
+            
+            const grid = document.createElement('div');
+            grid.className = 'shop-items';
+            
+            shopItems.forEach(item => {
+                const owned = gameState.items[item.id];
+                const tooExpensive = gameState.money < item.price;
+                
+                const card = document.createElement('div');
+                card.className = 'shop-item' + (owned ? ' owned' : '') + (tooExpensive && !owned ? ' too-expensive' : '');
+                
+                if (!owned && !tooExpensive) {
+                    card.onclick = () => buyItem(item.id);
+                }
+                
+                card.innerHTML = `
+                    <div class="item-icon">${item.icon}</div>
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-price">${owned ? '✓ Owned' : item.price + ' L'}</div>
+                    <div class="item-benefit">${item.benefit}</div>
+                `;
+                grid.appendChild(card);
+            });
+            
+            container.appendChild(grid);
+        }
+
+        function buyItem(itemId) {
+            const item = shopItems.find(i => i.id === itemId);
+            if (gameState.money >= item.price && !gameState.items[itemId]) {
+                gameState.money -= item.price;
+                gameState.items[itemId] = true;
+                updateStats();
+                renderShop(document.getElementById('actionContent'));
+                showModal('Purchase Complete!', `You bought ${item.name}! ${item.benefit}`);
+            }
+        }
+
+        function renderLiving(container) {
+            container.innerHTML = '<h3 style="margin-bottom: 20px;">Living Conditions</h3><p style="margin-bottom: 20px; color: #6c757d;">Better living conditions improve health and happiness but cost more per season.</p>';
+            
+            const selector = document.createElement('div');
+            selector.className = 'living-selector';
+            
+            livingConditions.forEach(condition => {
+                const option = document.createElement('div');
+                option.className = 'living-option' + (gameState.livingCondition === condition.id ? ' selected' : '');
+                option.onclick = () => setLiving(condition.id);
+                
+                option.innerHTML = `
+                    <h3>${condition.name}</h3>
+                    <div class="living-cost">${condition.cost} L/season</div>
+                    <div class="living-effects">
+                        ${condition.healthChange > 0 ? '+' : ''}${condition.healthChange} health/season<br>
+                        ${condition.happinessChange > 0 ? '+' : ''}${condition.happinessChange} happiness/season
+                    </div>
+                `;
+                selector.appendChild(option);
+            });
+            
+            container.appendChild(selector);
+        }
+
+        function setLiving(conditionId) {
+            gameState.livingCondition = conditionId;
+            updateStats();
+            renderLiving(document.getElementById('actionContent'));
+        }
+
+        function renderCommunity(container) {
+            container.innerHTML = '<h3 style="margin-bottom: 20px;">Community Projects</h3><p style="margin-bottom: 20px; color: #6c757d;">Volunteer work helps build these projects. Completed projects benefit the whole family!</p>';
+            
+            const progress = document.createElement('div');
+            progress.className = 'community-progress';
+            
+            // Market Stall (purchasable)
+            const stallDiv = document.createElement('div');
+            stallDiv.className = 'building-item';
+            stallDiv.innerHTML = `
+                <div class="building-header">
+                    <div class="building-name">🏪 Market Stall</div>
+                    <div class="building-status">${gameState.community.marketStall.built ? '✓ Built' : 'Can purchase for 500 L'}</div>
+                </div>
+                ${!gameState.community.marketStall.built ? `<button style="width: 100%; padding: 10px; background: #0073cf; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px;" onclick="buyStall()">Buy Market Stall - 500 L</button>` : '<p style="margin-top: 10px; color: #28a745;">Unlocks high-paying stall owner job!</p>'}
+            `;
+            progress.appendChild(stallDiv);
+            
+            // Other community buildings
+            Object.entries(gameState.community).forEach(([key, building]) => {
+                if (key === 'marketStall') return;
+                
+                const buildingDiv = document.createElement('div');
+                buildingDiv.className = 'building-item';
+                
+                const names = {
+                    communityCenter: '🏘️ Community Center',
+                    library: '📚 Library',
+                    healthCenter: '🏥 Health Center',
+                    soccerField: '⚽ Soccer Field'
+                };
+                
+                const benefits = {
+                    communityCenter: 'Unlocks more volunteer opportunities',
+                    library: '+1 education for all per season',
+                    healthCenter: '+2 health for all per season',
+                    soccerField: '+1 happiness for all per season'
+                };
+                
+                buildingDiv.innerHTML = `
+                    <div class="building-header">
+                        <div class="building-name">${names[key]}</div>
+                        <div class="building-status">${building.built ? '✓ Complete' : `${building.progress}/${building.required} volunteer sessions`}</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${(building.progress / building.required) * 100}%"></div>
+                    </div>
+                    ${building.built ? `<p style="margin-top: 10px; color: #28a745;">✓ ${benefits[key]}</p>` : ''}
+                `;
+                progress.appendChild(buildingDiv);
+            });
+            
+            container.appendChild(progress);
+        }
+
+        function buyStall() {
+            if (gameState.money >= 500 && !gameState.community.marketStall.built) {
+                gameState.money -= 500;
+                gameState.community.marketStall.built = true;
+                updateStats();
+                renderCommunity(document.getElementById('actionContent'));
+                showModal('Market Stall Purchased!', 'You can now work as a Market Stall Owner for 420 L per season!');
+            }
+        }
+
+        // Repeat Last Season
+        function repeatLastSeason() {
+            if (Object.keys(gameState.lastSeasonActions).length === 0) {
+                showModal('No Previous Season', 'There are no actions from last season to repeat.');
+                return;
+            }
+
+            let successCount = 0;
+            let failedMembers = [];
+
+            family.forEach(member => {
+                if (member.health <= 0) return; // Skip dead members
+
+                const lastAction = gameState.lastSeasonActions[member.id];
+                if (!lastAction) return;
+
+                // Check if action is still valid
+                if (lastAction.type === 'work') {
+                    const job = jobs.find(j => j.id === lastAction.id);
+                    if (job) {
+                        // Check if member can still do this job
+                        const meetsAge = (!job.minAge || member.age >= job.minAge) && 
+                                        (!job.maxAge || member.age <= job.maxAge) &&
+                                        (!job.adultsOnly || member.age >= 18);
+                        const meetsEducation = member.education >= job.education;
+                        const meetsGender = !job.gender || job.gender.includes(member.name);
+                        const meetsRequirements = (!job.requiresStall || gameState.community.marketStall.built) &&
+                                                 (!job.requiresBike || gameState.items.bike);
+                        const healthyEnough = member.health > 2;
+
+                        if (meetsAge && meetsEducation && meetsGender && meetsRequirements && healthyEnough) {
+                            member.action = { ...lastAction };
+                            successCount++;
+                        } else {
+                            failedMembers.push(member.name.split('(')[0].trim());
+                        }
+                    }
+                } else if (lastAction.type === 'school') {
+                    const school = schools.find(s => s.id === lastAction.id);
+                    if (school) {
+                        const meetsAge = (!school.adults || member.age >= 16) &&
+                                        (!school.adultsOnly || member.age >= 18) &&
+                                        member.age <= 25;
+                        const notFullyEducated = member.education < 15;
+                        const canAfford = gameState.money >= school.cost;
+                        const hasUniform = !school.requiresUniform || gameState.items.uniform;
+
+                        if (meetsAge && notFullyEducated && canAfford && hasUniform) {
+                            member.action = { ...lastAction };
+                            successCount++;
+                        } else {
+                            failedMembers.push(member.name.split('(')[0].trim());
+                        }
+                    }
+                } else {
+                    // Rest and volunteer always work
+                    member.action = { ...lastAction };
+                    successCount++;
+                }
+            });
+
+            renderFamily();
+            updateAssignmentStatus();
+
+            if (failedMembers.length > 0) {
+                showModal('⚠️ Partially Repeated', `Repeated actions for ${successCount} family members.\n\nCouldn't repeat for: ${failedMembers.join(', ')}\n(Requirements changed or no longer eligible)`);
+            } else if (successCount > 0) {
+                showModal('✓ Actions Repeated', `Successfully repeated all ${successCount} actions from last season!`);
+            }
+        }
+
+        // Advance Season
+        function advanceSeason() {
+            // Check all assigned (excluding dead members)
+            const livingMembers = family.filter(m => m.health > 0);
+            if (livingMembers.some(m => !m.action)) {
+                showModal('Incomplete Planning', 'Please assign actions to all living family members before advancing.');
+                return;
+            }
+
+            // Check for critically ill family members BEFORE advancing
+            const criticallyIll = family.filter(m => m.health <= 2 && m.health > 0);
+            if (criticallyIll.length > 0) {
+                const names = criticallyIll.map(m => m.name.split('(')[0].trim()).join(', ');
+                const proceed = confirm(`⚠️ WARNING: ${names} ${criticallyIll.length === 1 ? 'is' : 'are'} critically ill (health ≤ 2)!\n\nWithout treatment, they may DIE this season.\n\nVisit Healthcare tab to treat them, or click OK to continue anyway (RISKY!).`);
+                if (!proceed) {
+                    return;
+                }
+            }
+            
+            // Process actions
+            let income = 0;
+            let expenses = 0;
+            let volunteerCount = 0;
+            
+            family.forEach(member => {
+                if (!member.action) return;
+                
+                // FEATURE 2: HAPPINESS AFFECTS PERFORMANCE (Honduras reality: unhappy/depressed workers are less productive)
+                let happinessMultiplier = 1.0;
+                if (member.happiness <= 2) {
+                    happinessMultiplier = 0.8; // -20% when miserable
+                } else if (member.happiness <= 4) {
+                    happinessMultiplier = 0.9; // -10% when unhappy
+                } else if (member.happiness >= 8) {
+                    happinessMultiplier = 1.1; // +10% when happy
+                }
+                
+                if (member.action.type === 'work') {
+                    const job = jobs.find(j => j.id === member.action.id);
+                    const intensity = member.action.intensity || 'normal';
+                    
+                    // FEATURE 1: WORK INTENSITY SYSTEM (Honduras overtime culture)
+                    let payMultiplier = 1.0;
+                    let healthMultiplier = 1.0;
+                    
+                    if (intensity === 'easy') {
+                        payMultiplier = 0.75; // 75% pay for easier work
+                        healthMultiplier = 0.7; // Less health cost
+                    } else if (intensity === 'hard') {
+                        payMultiplier = 1.3; // +30% pay for overtime (Honduras standard: 125-175%)
+                        healthMultiplier = 1.5; // Much more exhausting
+                    }
+                    
+                    // SKILL BONUSES: High skills = better pay and less exhaustion!
+                    let skillBonus = 1.0;
+                    if (job.id === 'construction' && member.skills.construction !== undefined) {
+                        skillBonus = 1.0 + (member.skills.construction / 20); // Up to +50% at skill 10
+                        healthMultiplier *= (1 - member.skills.construction / 30); // Less exhausting when skilled
+                    } else if ((job.id === 'mechanic' || job.id === 'mechanic_assistant') && member.skills.mechanic !== undefined) {
+                        skillBonus = 1.0 + (member.skills.mechanic / 20);
+                        healthMultiplier *= (1 - member.skills.mechanic / 30);
+                    } else if ((job.id === 'market_vendor' || job.id === 'stall_owner') && member.skills.business !== undefined) {
+                        skillBonus = 1.0 + (member.skills.business / 15); // Business skill = better profits
+                    } else if (job.id === 'teacher' && member.skills.teaching !== undefined) {
+                        skillBonus = 1.0 + (member.skills.teaching / 25);
+                    } else if (job.id === 'farm_work' && member.skills.farming !== undefined) {
+                        skillBonus = 1.0 + (member.skills.farming / 30);
+                        healthMultiplier *= (1 - member.skills.farming / 40);
+                    }
+                    
+                    // Calculate final pay and health cost
+                    const finalPay = Math.floor(job.pay * payMultiplier * happinessMultiplier * skillBonus);
+                    const finalHealthCost = Math.ceil(job.healthCost * healthMultiplier);
+                    
+                    income += finalPay;
+                    member.health -= finalHealthCost;
+                    if (gameState.items.shoes) member.health += 1; // Shoes reduce work health cost
+                    
+                } else if (member.action.type === 'school') {
+                    const school = schools.find(s => s.id === member.action.id);
+                    const intensity = member.action.intensity || 'normal';
+                    
+                    // FEATURE 1: STUDY INTENSITY SYSTEM
+                    let educationMultiplier = 1.0;
+                    let healthMultiplier = 1.0;
+                    
+                    if (intensity === 'easy') {
+                        educationMultiplier = 0.75; // Learn less when taking it easy
+                        healthMultiplier = 0.7; // Less exhausting
+                    } else if (intensity === 'hard') {
+                        educationMultiplier = 1.3; // Learn more when studying hard
+                        healthMultiplier = 1.3; // More exhausting
+                    }
+                    
+                    // Calculate final education gain
+                    const finalEducation = Math.floor(school.education * educationMultiplier * happinessMultiplier);
+                    const finalHealthCost = Math.ceil(school.healthCost * healthMultiplier);
+                    
+                    expenses += school.cost;
+                    member.education = Math.min(15, member.education + finalEducation);
+                    member.health -= finalHealthCost;
+                    
+                    // Check for diploma
+                    if (member.education >= 12 && member.diplomas === 0) {
+                        member.diplomas = 1;
+                        gameState.diplomas += 1;
+                        showModal('🎓 Diploma Earned!', `${member.name} earned a diploma!`);
+                    }
+                } else if (member.action.type === 'volunteer') {
+                    member.education = Math.min(15, member.education + 1);
+                    member.happiness = Math.min(10, member.happiness + 1);
+                    volunteerCount++;
+                } else if (member.action.type === 'rest') {
+                    member.health = Math.min(10, member.health + 3);
+                    member.happiness = Math.min(10, member.happiness + 1);
+                }
+                
+                // Save action for "Repeat Last Season" button
+                gameState.lastSeasonActions[member.id] = { ...member.action };
+                member.action = null;
+            });
+            
+            // Process volunteer work toward community buildings
+            if (volunteerCount > 0) {
+                if (!gameState.community.communityCenter.built) {
+                    gameState.community.communityCenter.progress += volunteerCount;
+                    if (gameState.community.communityCenter.progress >= gameState.community.communityCenter.required) {
+                        gameState.community.communityCenter.built = true;
+                        showModal('🏘️ Community Center Built!', 'The community center is complete! New opportunities available.');
+                    }
+                } else if (!gameState.community.library.built) {
+                    gameState.community.library.progress += volunteerCount;
+                    if (gameState.community.library.progress >= gameState.community.library.required) {
+                        gameState.community.library.built = true;
+                        showModal('📚 Library Built!', 'The library is complete! +1 education per season for all!');
+                    }
+                } else if (!gameState.community.healthCenter.built) {
+                    gameState.community.healthCenter.progress += volunteerCount;
+                    if (gameState.community.healthCenter.progress >= gameState.community.healthCenter.required) {
+                        gameState.community.healthCenter.built = true;
+                        showModal('🏥 Health Center Built!', 'The health center is complete! +2 health per season for all!');
+                    }
+                } else if (!gameState.community.soccerField.built) {
+                    gameState.community.soccerField.progress += volunteerCount;
+                    if (gameState.community.soccerField.progress >= gameState.community.soccerField.required) {
+                        gameState.community.soccerField.built = true;
+                        showModal('⚽ Soccer Field Built!', 'The soccer field is complete! +1 happiness per season for all!');
+                    }
+                }
+            }
+            
+            // Living condition expenses
+            const living = livingConditions.find(l => l.id === gameState.livingCondition);
+            expenses += living.cost;
+            
+            // Apply living condition effects
+            family.forEach(member => {
+                member.health = Math.max(0, Math.min(10, member.health + living.healthChange));
+                member.happiness = Math.max(0, Math.min(10, member.happiness + living.happinessChange));
+            });
+            
+            // Item benefits
+            if (gameState.items.books) {
+                family.forEach(m => m.education = Math.min(15, m.education + 1));
+            }
+            if (gameState.items.radio) {
+                family.forEach(m => m.happiness = Math.min(10, m.happiness + 1));
+            }
+            if (gameState.items.toys) {
+                family.filter(m => m.age < 18).forEach(m => m.happiness = Math.min(10, m.happiness + 1));
+            }
+            if (gameState.items.bed) {
+                family.forEach(m => m.health = Math.min(10, m.health + 2));
+            }
+            if (gameState.items.plumbing) {
+                family.forEach(m => m.health = Math.min(10, m.health + 3));
+            }
+            if (gameState.items.livestock) {
+                income += 80;
+            }
+            if (gameState.items.computer) {
+                family.forEach(m => m.education = Math.min(15, m.education + 2));
+            }
+            
+            // Community building benefits
+            if (gameState.community.library.built) {
+                family.forEach(m => m.education = Math.min(15, m.education + 1));
+            }
+            if (gameState.community.healthCenter.built) {
+                family.forEach(m => m.health = Math.min(10, m.health + 2));
+            }
+            if (gameState.community.soccerField.built) {
+                family.forEach(m => m.happiness = Math.min(10, m.happiness + 1));
+            }
+            
+            // Update money
+            gameState.money += income - expenses;
+
+            // Grow skills based on actions
+            growSkills();
+
+            // Process relationship events
+            processRelationships();
+            
+            // Check for character dialogue (40% chance, happens before other events)
+            const hadDialogue = checkForDialogue();
+            
+            // Check for positive event (30% chance, separate from negative)
+            const hadPositiveEvent = checkPositiveEvent();
+            
+            // Random event (60% chance, only if no dialogue or positive event)
+            if (!hadDialogue && !hadPositiveEvent && Math.random() < 0.6) {
+                const event = events[Math.floor(Math.random() * events.length)];
+                processEvent(event);
+            }
+
+            // Check achievements
+            checkAchievements();
+            
+            // Check game over conditions
+            const allDead = family.every(m => m.health <= 0);
+            const veryBroke = gameState.money < -3000;
+            
+            // Check for individual deaths
+            const deaths = family.filter(m => m.health <= 0);
+            if (deaths.length > 0 && deaths.length < family.length) {
+                const names = deaths.map(m => m.name.split('(')[0].trim()).join(', ');
+                showModal('💔 Tragedy', `${names} ${deaths.length === 1 ? 'has' : 'have'} passed away from illness and exhaustion. The family must continue without them.`);
+                // Remove deceased from family (mark as dead rather than remove from array)
+                deaths.forEach(m => {
+                    m.name = `${m.name.split('(')[0].trim()} ✝️`;
+                    m.health = 0;
+                    m.action = null;
+                });
+            }
+            
+            if (allDead) {
+                endGame('Every family member succumbed to illness and poverty. This devastating reality affects many Honduran families who lack access to healthcare.');
+                return;
+            } else if (veryBroke) {
+                endGame('Crushing debt forced the family to migrate north in search of opportunities.');
+                return;
+            }
+            
+            // Advance season
+            gameState.season++;
+            if (gameState.season % 4 === 1) {
+                gameState.year++;
+            }
+            
+            // Check win condition
+            if (gameState.season > 16) {
+                calculateFinalScore();
+                return;
+            }
+            
+            // Update display
+            renderFamily();
+            updateStats();
+            showTab('actions');
+        }
+
+        function processEvent(event) {
+            let message = event.text;
+            
+            if (event.moneyChange) {
+                gameState.money += event.moneyChange;
+            }
+            
+            if (event.healthChange) {
+                family.forEach(m => {
+                    m.health = Math.max(0, Math.min(10, m.health + event.healthChange));
+                });
+            }
+            
+            if (event.happinessChange) {
+                family.forEach(m => {
+                    m.happiness = Math.max(0, Math.min(10, m.happiness + event.happinessChange));
+                });
+            }
+            
+            if (event.educationChange) {
+                const students = family.filter(m => m.age < 25);
+                if (students.length > 0) {
+                    const lucky = students[Math.floor(Math.random() * students.length)];
+                    lucky.education = Math.min(15, lucky.education + event.educationChange);
+                    if (event.educationChange > 0) {
+                        message += ` ${lucky.name.split('(')[0].trim()} benefited!`;
+                    }
+                }
+            }
+
+            // Special achievement for surviving hurricane
+            if (event.text.includes('Hurricane')) {
+                if (!gameState.achievements.includes('survived_hurricane')) {
+                    gameState.achievements.push('survived_hurricane');
+                    setTimeout(() => {
+                        showAchievement({ 
+                            id: 'survived_hurricane', 
+                            name: 'Storm Survivor', 
+                            description: 'Survived a hurricane',
+                            icon: '🌪️'
+                        });
+                    }, 1000);
+                }
+            }
+            
+            const title = event.type === 'good' ? '🎉 Good News!' : event.type === 'bad' ? '⚠️ Challenge!' : 'Season Update';
+            showModal(title, message);
+        }
+
+        // Process Positive Events
+        function checkPositiveEvent() {
+            // 30% chance of positive event
+            if (Math.random() > 0.3) return false;
+
+            // Find eligible positive events
+            const eligible = positiveEvents.filter(event => {
+                if (event.targetMember !== undefined) {
+                    const member = family[event.targetMember];
+                    return !event.condition || event.condition(member);
+                }
+                return true;
+            });
+
+            if (eligible.length === 0) return false;
+
+            const event = eligible[Math.floor(Math.random() * eligible.length)];
+            processPositiveEvent(event);
+            return true;
+        }
+
+        function processPositiveEvent(event) {
+            let message = event.text;
+
+            if (event.moneyChange) {
+                gameState.money += event.moneyChange;
+            }
+
+            if (event.healthChange) {
+                family.forEach(m => {
+                    m.health = Math.max(0, Math.min(10, m.health + event.healthChange));
+                });
+            }
+
+            if (event.happinessChange) {
+                if (event.targetMember !== undefined) {
+                    const member = family[event.targetMember];
+                    member.happiness = Math.min(10, member.happiness + event.happinessChange);
+                } else {
+                    family.forEach(m => {
+                        m.happiness = Math.min(10, m.happiness + event.happinessChange);
+                    });
+                }
+            }
+
+            if (event.skillBoost && event.targetMember !== undefined) {
+                const member = family[event.targetMember];
+                Object.entries(event.skillBoost).forEach(([skill, amount]) => {
+                    if (member.skills[skill] !== undefined) {
+                        member.skills[skill] = Math.min(10, member.skills[skill] + amount);
+                    }
+                });
+            }
+
+            if (event.message) {
+                message += ' ' + event.message;
+            }
+
+            showModal('✨ Good Fortune!', message);
+        }
+
+        function calculateFinalScore() {
+            const avgHealth = family.reduce((sum, m) => sum + m.health, 0) / family.length;
+            const avgEducation = family.reduce((sum, m) => sum + m.education, 0) / family.length;
+            const avgHappiness = family.reduce((sum, m) => sum + m.happiness, 0) / family.length;
+            
+            let message = 'The Rodríguez family survived 4 years in Honduras! ';
+            
+            if (gameState.money > 8000 && avgHealth > 7 && avgEducation > 10 && avgHappiness > 7) {
+                message += 'They achieved prosperity and stability! A remarkable achievement.';
+            } else if (gameState.money > 5000 && avgHealth > 5 && avgEducation > 7) {
+                message += 'They built a decent life with some security for the future.';
+            } else if (avgHealth > 3) {
+                message += 'They survived, but continue to struggle daily. The cycle of poverty persists.';
+            } else {
+                message += 'They barely survived. Many challenges remain ahead.';
+            }
+            
+            endGame(message);
+        }
+
+        function endGame(message) {
+            const container = document.querySelector('.game-container');
+            
+            const avgHealth = family.reduce((sum, m) => sum + m.health, 0) / family.length;
+            const avgEducation = family.reduce((sum, m) => sum + m.education, 0) / family.length;
+            const avgHappiness = family.reduce((sum, m) => sum + m.happiness, 0) / family.length;
+            
+            // Get achievements earned
+            const achievementsEarned = achievements.filter(a => gameState.achievements.includes(a.id));
+            
+            // Determine ending type
+            let endingType = '';
+            let endingMessage = '';
+            if (gameState.diplomas >= 3 && gameState.money > 1000) {
+                endingType = '🌟 TRIUMPH ENDING';
+                endingMessage = 'Through hard work and smart choices, your family found a path to stability!';
+            } else if (gameState.money > 500 && avgHealth > 5) {
+                endingType = '💪 SURVIVOR ENDING';
+                endingMessage = 'Your family survived against all odds. The struggle continues, but hope remains.';
+            } else if (avgHealth < 3 || gameState.money < -1000) {
+                endingType = '💔 TRAGEDY ENDING';
+                endingMessage = 'The weight of poverty proved too heavy. Many Honduran families face this reality.';
+            } else {
+                endingType = '🤝 PERSEVERANCE ENDING';
+                endingMessage = 'Your family endured tremendous hardship. This is the daily reality for millions.';
+            }
+            
+            container.innerHTML = `
+                <div class="end-screen">
+                    <h2>Game Over</h2>
+                    <div style="font-size: 1.8em; margin: 20px 0; color: #0073cf;">${endingType}</div>
+                    <p style="font-size: 1.2em; max-width: 600px; margin: 0 auto 20px; line-height: 1.6;">${message}</p>
+                    <p style="font-size: 1.1em; max-width: 600px; margin: 0 auto 30px; line-height: 1.6; color: #667eea;">${endingMessage}</p>
+                    
+                    <div class="final-stats">
+                        <div class="final-stat">
+                            <div class="final-stat-label">Final Money</div>
+                            <div class="final-stat-value">${gameState.money} L</div>
+                        </div>
+                        <div class="final-stat">
+                            <div class="final-stat-label">Diplomas Earned</div>
+                            <div class="final-stat-value">${gameState.diplomas}</div>
+                        </div>
+                        <div class="final-stat">
+                            <div class="final-stat-label">Avg Health</div>
+                            <div class="final-stat-value">${avgHealth.toFixed(1)}/10</div>
+                        </div>
+                        <div class="final-stat">
+                            <div class="final-stat-label">Avg Education</div>
+                            <div class="final-stat-value">${avgEducation.toFixed(1)}/15</div>
+                        </div>
+                        <div class="final-stat">
+                            <div class="final-stat-label">Avg Happiness</div>
+                            <div class="final-stat-value">${avgHappiness.toFixed(1)}/10</div>
+                        </div>
+                        <div class="final-stat">
+                            <div class="final-stat-label">Achievements</div>
+                            <div class="final-stat-value">${gameState.achievements.length}/${achievements.length}</div>
+                        </div>
+                    </div>
+
+                    ${achievementsEarned.length > 0 ? `
+                        <div style="margin: 30px auto; max-width: 700px; background: #f8f9fa; padding: 20px; border-radius: 15px;">
+                            <h3 style="color: #0073cf; margin-bottom: 15px;">🏆 Achievements Unlocked (${achievementsEarned.length})</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
+                                ${achievementsEarned.map(a => `
+                                    <div style="background: white; padding: 10px; border-radius: 10px; text-align: center;">
+                                        <div style="font-size: 2em;">${a.icon}</div>
+                                        <div style="font-size: 0.9em; font-weight: bold; margin-top: 5px;">${a.name}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <div style="margin: 30px auto; max-width: 600px; background: #f8f9fa; padding: 20px; border-radius: 15px; text-align: left;">
+                        <h3 style="color: #0073cf; margin-bottom: 15px;">📊 Reality Check</h3>
+                        <p style="margin-bottom: 10px; color: #495057; line-height: 1.6;">
+                            <strong>In Honduras:</strong><br>
+                            • 65% of the population lives in poverty<br>
+                            • Average household income: ~12,000 L/year<br>
+                            • Your family earned: ${Math.max(0, gameState.money - 500 + (gameState.season * 200))} L over ${Math.floor((gameState.season-1)/4)} years<br>
+                            • Gang extortion affects 1 in 5 families<br>
+                            • Remittances from migrants make up 20% of GDP<br>
+                            • Education access remains limited for rural families
+                        </p>
+                    </div>
+                    
+                    <button class="restart-btn" onclick="location.reload()">Play Again</button>
+                    
+                    <p style="margin-top: 40px; color: #6c757d; max-width: 600px; margin-left: auto; margin-right: auto;">
+                        This game illustrates the challenges faced by families in Honduras. Every choice reflects the difficult decisions families make daily to survive and pursue a better future.
+                    </p>
+                </div>
+            `;
+        }
+
+        // Achievement System
+        const achievements = [
+            { id: 'first_diploma', name: 'First Diploma!', description: 'A family member earned their first diploma', icon: '🎓', check: () => gameState.diplomas >= 1 },
+            { id: 'all_school', name: 'Education First', description: 'All children attending school in one season', icon: '📚', check: () => family.filter(m => m.age < 18 && m.action?.type === 'school').length >= 3 },
+            { id: 'survived_hurricane', name: 'Storm Survivor', description: 'Survived a hurricane', icon: '🌪️', check: () => false }, // Set by event
+            { id: 'decent_living', name: 'Moving Up', description: 'Reached Decent living conditions', icon: '🏠', check: () => gameState.livingCondition !== 'poor' },
+            { id: 'good_living', name: 'Comfortable Life', description: 'Reached Good living conditions', icon: '✨', check: () => gameState.livingCondition === 'good' },
+            { id: 'first_purchase', name: 'First Investment', description: 'Bought your first item', icon: '🛒', check: () => Object.values(gameState.items).some(v => v === true) },
+            { id: 'bought_bike', name: 'Got Wheels!', description: 'Purchased a bicycle', icon: '🚲', check: () => gameState.items.bike },
+            { id: 'market_stall', name: 'Business Owner', description: 'Bought the market stall', icon: '🏪', check: () => gameState.community.marketStall.built },
+            { id: 'library_built', name: 'Knowledge Hub', description: 'Helped build the community library', icon: '📖', check: () => gameState.community.library.built },
+            { id: 'health_center', name: 'Healthcare Access', description: 'Helped build the health center', icon: '🏥', check: () => gameState.community.healthCenter.built },
+            { id: 'year_1', name: 'First Year Complete', description: 'Survived the first year', icon: '⭐', check: () => gameState.year >= 2 },
+            { id: 'year_2', name: 'Two Years Strong', description: 'Made it through two years', icon: '⭐⭐', check: () => gameState.year >= 3 },
+            { id: 'positive_money', name: 'In The Black', description: 'Ended a season with money saved', icon: '💰', check: () => gameState.money > 800 },
+            { id: 'all_healthy', name: 'Healthy Family', description: 'All family members above 7 health', icon: '❤️', check: () => family.every(m => m.health > 7) },
+            { id: 'all_happy', name: 'Joyful Home', description: 'All family members above 7 happiness', icon: '😊', check: () => family.every(m => m.happiness > 7) },
+            { id: 'miguel_mechanic', name: 'Master Mechanic', description: 'Miguel reached mechanic skill level 5', icon: '🔧', check: () => family[3].skills.mechanic >= 5 },
+            { id: 'sofia_teacher', name: 'Born Teacher', description: 'Sofía reached teaching skill level 5', icon: '👩‍🏫', check: () => family[2].skills.teaching >= 5 },
+            { id: 'ana_genius', name: 'Child Prodigy', description: 'Ana reached 12+ education before age 12', icon: '✨', check: () => family[4].education >= 12 && family[4].age < 12 }
+        ];
+
+        function checkAchievements() {
+            achievements.forEach(achievement => {
+                if (!gameState.achievements.includes(achievement.id) && achievement.check()) {
+                    gameState.achievements.push(achievement.id);
+                    showAchievement(achievement);
+                }
+            });
+        }
+
+        function showAchievement(achievement) {
+            const notification = document.createElement('div');
+            notification.className = 'achievement-notification';
+            notification.innerHTML = `
+                <h3>${achievement.icon} Achievement Unlocked!</h3>
+                <p><strong>${achievement.name}</strong></p>
+                <p>${achievement.description}</p>
+            `;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideInRight 0.5s ease reverse';
+                setTimeout(() => notification.remove(), 500);
+            }, 3000);
+        }
+
+        // Skill Growth System - Skills grow from RELEVANT activities
+        function growSkills() {
+            family.forEach(member => {
+                if (!member.action) return;
+
+                // Skills grow based on RELEVANT actions
+                if (member.action.type === 'work') {
+                    const job = jobs.find(j => j.id === member.action.id);
+                    const intensity = member.action.intensity || 'normal';
+                    let growthRate = intensity === 'easy' ? 0.3 : intensity === 'hard' ? 0.7 : 0.5;
+                    
+                    if (job) {
+                        // Each job grows SPECIFIC relevant skills
+                        if ((job.id === 'construction' || job.id === 'farm_work') && member.skills.construction !== undefined) {
+                            member.skills.construction = Math.min(10, member.skills.construction + growthRate);
+                        }
+                        if ((job.id === 'mechanic' || job.id === 'mechanic_assistant') && member.skills.mechanic !== undefined) {
+                            member.skills.mechanic = Math.min(10, member.skills.mechanic + (job.id === 'mechanic' ? growthRate * 1.5 : growthRate));
+                        }
+                        if ((job.id === 'market_vendor' || job.id === 'stall_owner') && member.skills.business !== undefined) {
+                            member.skills.business = Math.min(10, member.skills.business + growthRate);
+                        }
+                        if (job.id === 'teacher' && member.skills.teaching !== undefined) {
+                            member.skills.teaching = Math.min(10, member.skills.teaching + growthRate * 1.5);
+                        }
+                        if (job.id === 'secretary' && member.skills.leadership !== undefined) {
+                            member.skills.leadership = Math.min(10, member.skills.leadership + growthRate * 0.5);
+                        }
+                        // Street smarts grows from any work
+                        if (member.skills.streetSmart !== undefined) {
+                            member.skills.streetSmart = Math.min(10, member.skills.streetSmart + growthRate * 0.2);
+                        }
+                    }
+                } else if (member.action.type === 'school') {
+                    const intensity = member.action.intensity || 'normal';
+                    let growthRate = intensity === 'easy' ? 0.2 : intensity === 'hard' ? 0.5 : 0.3;
+                    
+                    // School helps with educational skills
+                    if (member.skills.reading !== undefined) {
+                        member.skills.reading = Math.min(10, member.skills.reading + growthRate);
+                    }
+                    if (member.skills.english !== undefined) {
+                        member.skills.english = Math.min(10, member.skills.english + growthRate);
+                    }
+                    if (member.skills.technology !== undefined) {
+                        member.skills.technology = Math.min(10, member.skills.technology + growthRate * 0.5);
+                    }
+                    if (member.skills.teaching !== undefined && member.age >= 14) {
+                        member.skills.teaching = Math.min(10, member.skills.teaching + growthRate * 0.3);
+                    }
+                } else if (member.action.type === 'rest') {
+                    // Rest gives small boosts to hobby/natural skills
+                    if (member.skills.soccer !== undefined && Math.random() < 0.4) {
+                        member.skills.soccer = Math.min(10, member.skills.soccer + 0.3);
+                    }
+                    if (member.skills.creativity !== undefined && Math.random() < 0.4) {
+                        member.skills.creativity = Math.min(10, member.skills.creativity + 0.3);
+                    }
+                    if (member.skills.cooking !== undefined && Math.random() < 0.3) {
+                        member.skills.cooking = Math.min(10, member.skills.cooking + 0.2);
+                    }
+                } else if (member.action.type === 'volunteer') {
+                    // Volunteering builds leadership and community skills
+                    if (member.skills.leadership !== undefined) {
+                        member.skills.leadership = Math.min(10, member.skills.leadership + 0.4);
+                    }
+                }
+                
+                // Check for skill milestone achievements
+                checkSkillMilestones(member);
+            });
+        }
+
+        function checkSkillMilestones(member) {
+            // Miguel's mechanic journey
+            if (member.id === 3 && member.skills.mechanic >= 5 && !member.storyMilestones.includes('mechanic_skilled')) {
+                member.storyMilestones.push('mechanic_skilled');
+                showModal('🔧 Skilled Mechanic!', `Miguel has become a skilled mechanic! His mechanic skill reached level 5. He can now earn more as a full mechanic instead of just an assistant!`);
+            }
+            
+            // Sofía's teaching journey
+            if (member.id === 2 && member.skills.teaching >= 5 && !member.storyMilestones.includes('teacher_ready')) {
+                member.storyMilestones.push('teacher_ready');
+                showModal('👩‍🏫 Born Teacher!', `Sofía's teaching skill reached level 5! She's ready to become a professional teacher and inspire others.`);
+            }
+            
+            // Ana's genius path
+            if (member.id === 4 && member.skills.reading >= 7 && member.skills.technology >= 5 && !member.storyMilestones.includes('child_prodigy')) {
+                member.storyMilestones.push('child_prodigy');
+                showModal('✨ Child Prodigy!', `Ana has shown exceptional talent! Her reading (${member.skills.reading}) and technology (${member.skills.technology}) skills are remarkably high for her age.`);
+            }
+            
+            // Carlos's business dream
+            if (member.id === 0 && member.skills.business >= 5 && !member.storyMilestones.includes('business_ready')) {
+                member.storyMilestones.push('business_ready');
+                showModal('💼 Business Minded!', `Carlos has developed strong business skills (level 5)! He's ready to run his own market stall or small business.`);
+            }
+            
+            // María's leadership
+            if (member.id === 1 && member.skills.leadership >= 5 && !member.storyMilestones.includes('community_leader')) {
+                member.storyMilestones.push('community_leader');
+                showModal('🌟 Community Leader!', `María's leadership skill reached level 5! She's becoming a voice for the community.`);
+            }
+        }
+
+        // Relationship System
+        function processRelationships() {
+            // Positive relationship events
+            if (Math.random() < 0.2) {
+                // Siblings help each other
+                if (family[2].action?.type === 'school' && family[4].action?.type === 'school') {
+                    family[2].skills.teaching = Math.min(10, (family[2].skills.teaching || 0) + 0.5);
+                    family[4].education = Math.min(15, family[4].education + 0.5);
+                    family[2].happiness = Math.min(10, family[2].happiness + 1);
+                    family[4].happiness = Math.min(10, family[4].happiness + 1);
+                    family[2].relationships[4] = Math.min(10, family[2].relationships[4] + 0.5);
+                    family[4].relationships[2] = Math.min(10, family[4].relationships[2] + 0.5);
+                    
+                    showModal('💕 Sisterly Bond', 'Sofía helped Ana with her homework. Both girls are closer now and Ana learned more!');
+                }
+            }
+
+            // Negative relationship events (when stressed)
+            if (Math.random() < 0.15 && (gameState.money < 200 || family.some(m => m.health < 4))) {
+                // Parents argue about money
+                family[0].happiness = Math.max(0, family[0].happiness - 1);
+                family[1].happiness = Math.max(0, family[1].happiness - 1);
+                family[0].relationships[1] = Math.max(0, family[0].relationships[1] - 0.5);
+                family[1].relationships[0] = Math.max(0, family[1].relationships[0] - 0.5);
+                
+                showModal('😔 Family Tension', 'Carlos and María argued about money and the family\'s future. The stress is taking its toll.');
+            }
+
+            // Family bonding when things are good
+            if (gameState.livingCondition === 'good' && Math.random() < 0.2) {
+                family.forEach(m => {
+                    m.happiness = Math.min(10, m.happiness + 1);
+                    Object.keys(m.relationships).forEach(key => {
+                        m.relationships[key] = Math.min(10, m.relationships[key] + 0.3);
+                    });
+                });
+                showModal('💝 Family Dinner', 'The family shared a wonderful meal together. Everyone\'s spirits are lifted!');
+            }
+        }
+        function showModal(title, message) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalBody').innerHTML = message;
+            document.getElementById('modal').style.display = 'flex';
+            document.getElementById('modal').classList.remove('dialogue-modal');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        // Character Dialogue System
+        function checkForDialogue() {
+            // 40% chance of character dialogue event
+            if (Math.random() > 0.4) return false;
+
+            // Find eligible dialogues
+            const eligibleDialogues = characterDialogues.filter(dialogue => {
+                if (dialogue.character === null) {
+                    // Multi-character or family-wide event
+                    return dialogue.condition();
+                } else {
+                    // Individual character event
+                    const member = family[dialogue.character];
+                    return dialogue.condition(member);
+                }
+            });
+
+            if (eligibleDialogues.length === 0) return false;
+
+            // Pick random eligible dialogue
+            const dialogue = eligibleDialogues[Math.floor(Math.random() * eligibleDialogues.length)];
+            showDialogue(dialogue);
+            return true;
+        }
+
+        function showDialogue(dialogue) {
+            const modal = document.getElementById('modal');
+            modal.classList.add('dialogue-modal');
+            
+            let characterName = 'The Family';
+            let characterEmoji = '👨‍👩‍👧‍👦';
+            
+            if (dialogue.character !== null) {
+                const member = family[dialogue.character];
+                characterName = member.name;
+                characterEmoji = member.emoji;
+            }
+
+            const modalContent = `
+                <div class="dialogue-header">
+                    <div class="dialogue-avatar">${characterEmoji}</div>
+                    <div class="dialogue-info">
+                        <div class="dialogue-name">${characterName}</div>
+                        <div class="dialogue-emotion">${dialogue.emoji} wants to talk...</div>
+                    </div>
+                </div>
+                <div class="speech-bubble">
+                    ${dialogue.dialogue}
+                </div>
+                <div class="choice-buttons">
+                    ${dialogue.choices.map((choice, index) => `
+                        <button class="choice-btn" onclick="handleDialogueChoice(${JSON.stringify(choice.effect).replace(/"/g, '&quot;')}, '${choice.effect.message}', ${dialogue.character})">
+                            ${choice.text}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+
+            document.getElementById('modalTitle').textContent = '💬 Family Conversation';
+            document.getElementById('modalBody').innerHTML = modalContent;
+            modal.style.display = 'flex';
+        }
+
+        function handleDialogueChoice(effect, message, characterIndex) {
+            closeModal();
+
+            // Apply effects
+            if (effect.moneyChange) {
+                gameState.money += effect.moneyChange;
+            }
+
+            if (characterIndex !== null && characterIndex !== undefined) {
+                const member = family[characterIndex];
+                
+                if (effect.happinessChange) {
+                    member.happiness = Math.max(0, Math.min(10, member.happiness + effect.happinessChange));
+                }
+                if (effect.healthChange) {
+                    member.health = Math.max(0, Math.min(10, member.health + effect.healthChange));
+                }
+                if (effect.educationChange) {
+                    member.education = Math.min(15, member.education + effect.educationChange);
+                }
+                if (effect.forceRest) {
+                    member.action = { type: 'rest' };
+                }
+            }
+
+            // Apply effects to all family members
+            if (effect.happinessChangeAll) {
+                family.forEach(m => {
+                    m.happiness = Math.max(0, Math.min(10, m.happiness + effect.happinessChangeAll));
+                });
+            }
+            if (effect.healthChangeAll) {
+                family.forEach(m => {
+                    m.health = Math.max(0, Math.min(10, m.health + effect.healthChangeAll));
+                });
+            }
+            if (effect.forceRestAll) {
+                family.forEach(m => {
+                    m.action = { type: 'rest' };
+                });
+            }
+
+            // Show result message
+            setTimeout(() => {
+                showModal('Result', message);
+                renderFamily();
+                updateStats();
+            }, 300);
+        }
+    </script>
+</body>
+</html>
